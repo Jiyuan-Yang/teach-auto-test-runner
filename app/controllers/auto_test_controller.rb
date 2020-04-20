@@ -21,10 +21,11 @@ class AutoTestController < ApplicationController
   def start_auto_test
     project_id = params[:project_id].to_i
     # use `,` to split
-    git_ssh_addr_list = params[:git_ssh_addr_list].split(',')
+    # todo: here we use http to clone, consider to use SSH later
+    git_repo_list = params[:git_repo_list].split(',')
     # check if there is a directory for this project, if not, create it
     project_dir_initializer(project_id)
-    git_pull_projects(project_id, git_ssh_addr_list)
+    git_pull_projects(project_id, git_repo_list)
   end
 
   def get_auto_test_results

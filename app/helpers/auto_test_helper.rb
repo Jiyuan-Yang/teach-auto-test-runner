@@ -27,13 +27,13 @@ module AutoTestHelper
     end
   end
 
-  def git_pull_projects(project_id, git_ssh_addr_list)
+  def git_pull_projects(project_id, git_repo_list)
     # git_ssh_addr format like: git@gitlab_server_ip:group_name/sub_group_name/project_name.git
     # remember to add id_rsa.pub into the SSH key rings of GitLab user 'root'
     # ATTENTION: project_id is public repo project id
     puts("[I] Change working directory to #{AUTO_TEST_PROJECT_ROOT}/#{project_id.to_s}/student_projects")
     Dir::chdir("#{AUTO_TEST_PROJECT_ROOT}/#{project_id.to_s}/student_projects")
-    git_ssh_addr_list.each do |item|
+    git_repo_list.each do |item|
       puts("[I] Cloning #{item}")
       `git clone #{item}`
     end
