@@ -57,6 +57,7 @@ class AutoTestController < ApplicationController
     c_lang_compiler = ''
     execute_instruction = ''
     main_name = 'main.c'
+    output_name = 'output.output'
 
     if /darwin/i =~ RUBY_PLATFORM
       # BSD UNIX -> darwin -> macOS
@@ -73,8 +74,10 @@ class AutoTestController < ApplicationController
       # todo: in Linux & macOS, we use `./a.out` to run, check how it runs on Windows
       execute_instruction = './a.out'
     end
-    # instrument_list = ["#{c_lang_compiler} {main_name}", "#{execute_instruction} > {output_name}"]
-    instrument_list = ["#{c_lang_compiler} {main_name}"]
+    instrument_list = ["#{c_lang_compiler} {main_name}", "#{execute_instruction} > {output_name}"]
+    # instrument_list = ["#{c_lang_compiler} {main_name}"]
+
+    exec_auto_test project_id.to_s, main_name, output_name, instrument_list
 
   end
 
