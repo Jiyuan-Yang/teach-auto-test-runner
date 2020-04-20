@@ -23,12 +23,57 @@ class AutoTestController < ApplicationController
     # use `,` to split
     # todo: here we use http to clone, consider to use SSH later
     git_repo_list = params[:git_repo_list].split(',')
+    # todo: currently, we load test point from db, transfer them into txt
+    # todo: in the future, we will offer the user a boolean var `use_text_file`
+    # todo: if true, generate *.txt. Now we regarded it as true
+    use_text_file = params[:use_text_file]
+    if use_text_file.nil?
+      # currently, default is `true`
+      use_text_file = true
+    end
+
     # check if there is a directory for this project, if not, create it
     project_dir_initializer(project_id)
-    git_pull_projects(project_id, git_repo_list)
+
+    # generate data
+    auto_test_point_root = "#{AUTO_TEST_PROJECT_ROOT}/#{project_id}/test_data"
+    student_projects_root = "#{AUTO_TEST_PROJECT_ROOT}/#{project_id}/student_projects"
+    if use_text_file
+      auto_test_file_generator(project_id, auto_test_point_root)
+    end
+
+    # use git clone to get project
+    git_clone_projects(project_id, git_repo_list)
+
+    # then, we start to test
+    # todo: here we assume students submit main.c
+
+    c_lang_compiler = ''
+    execute_instruction = ''
+    main_name = 'main.c'
+
+    if /darwin/i =~ RUBY_PLATFORM
+      # BSD UNIX -> darwin -> macOS
+      # in macOS, use clang in default
+      c_lang_compiler = 'clang'
+      execute_instruction = './a.out'
+    elsif /linux/i =~ RUBY_PLATFORM
+      # GNU Linux
+      # in Linux, use gcc in default
+      c_lang_compiler = 'gcc'
+      execute_instruction = './a.out'
+    else
+      c_lang_compiler = 'gcc'
+      # todo: in Linux & macOS, we use `./a.out` to run, check how it runs on Windows
+      execute_instruction = './a.out'
+    end
+    # instrument_list = ["#{c_lang_compiler} {main_name}", "#{execute_instruction} > {output_name}"]
+    instrument_list = ["#{c_lang_compiler} {main_name}"]
+
   end
 
   def get_auto_test_results
 
   end
+
 end
