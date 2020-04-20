@@ -78,6 +78,7 @@ module AutoTestHelper
     Dir::chdir('../../../')
   end
 
+  # todo: use this method to get users' compiling instruction (stage 1)
   def exec_auto_test(project_id, main_name, instrument_list)
     puts("[I] Change working directory to #{AUTO_TEST_PROJECT_ROOT}/#{project_id}")
     Dir::chdir("#{AUTO_TEST_PROJECT_ROOT}/#{project_id}")
@@ -100,6 +101,8 @@ module AutoTestHelper
     Dir::chdir('../../')
   end
 
+  # todo: use this method to get users' executing instruction (stage 2)
+  # todo: we could save files into one place
   def auto_test_result_compare
     test_case = {}
 
@@ -113,4 +116,7 @@ module AutoTestHelper
     end
 
   end
+
+  # todo: then we need to figure out a method to compare
+  # todo: def ... ...
 end

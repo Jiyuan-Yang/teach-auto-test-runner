@@ -46,7 +46,13 @@ class AutoTestController < ApplicationController
     git_clone_projects(project_id, git_repo_list)
 
     # then, we start to test
-    # todo: here we assume students submit main.c
+    # todo: in this part we give user two input stages
+    # todo: first, user gives us the compiling instruction, like `clang main.c`
+    # todo: second, user gives us the exec instruction, like `./a.out`
+    # todo: in the first stage, let user assume that he/she is at the project dir
+    # todo: (therefore we need to use Dir::chdir to change)
+    # todo: in the second stage, we execute it to get an output
+    # todo: after those two stages, we compare actual results and expected results
 
     c_lang_compiler = ''
     execute_instruction = ''

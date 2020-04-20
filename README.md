@@ -4,10 +4,13 @@
 
 ## 评测目录结构
 
-默认建立在Runner的auto_test_data下，其内部结构为：
+默认建立在Runner的auto_test_data下，其内部结构为:
 - project_id: 这里project指的是公共发布区的project_id
     - test_data: 用于存放txt格式的输入输出测试点
     - student_projects: 用于存放pull下来的学生仓库
+    - student_output: 用于存放学生的输出
+
+注意每次启动测试都应该对文件夹进行清空。
 
 ## API
 ```
