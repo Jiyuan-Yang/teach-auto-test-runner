@@ -1,0 +1,2 @@
+class AutoTestController < ApplicationController
+end

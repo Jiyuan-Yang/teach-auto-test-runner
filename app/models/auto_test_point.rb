@@ -1,0 +1,2 @@
+class AutoTestPoint < ApplicationRecord
+end
