@@ -46,13 +46,29 @@ class AutoTestController < ApplicationController
     git_clone_projects(project_id, git_repo_list)
 
     # then, we start to test
-    # todo: in this part we give user two input stages
-    # todo: first, user gives us the compiling instruction, like `clang main.c`
-    # todo: second, user gives us the exec instruction, like `./a.out`
-    # todo: in the first stage, let user assume that he/she is at the project dir
-    # todo: (therefore we need to use Dir::chdir to change)
-    # todo: in the second stage, we execute it to get an output
-    # todo: after those two stages, we compare actual results and expected results
+    # let user assume that he/she is at the project dir to run bash command for compile and run project
+    =begin
+      in this comment, I will describe the workflow for user to compile, run and test project
+      1. in HTTP post to request the start_auto_test method, user need to config some params
+        Attribute	            Type	      Required	    Description
+        target_env            string      no            default is origin ubuntu env, user can ask admin to 
+                                                        create new env to run their porject. Now, I think we
+                                                        can give each env an unique id or name.
+        instrument_list       string      yes           a series of bash command to compile and run project.
+
+        input_type            string      yes           These 4 commands is a draft for how user control the
+        input_file            string      yes           project run, I think we need to discuss about this in
+        output_type           string      yes           team meeting.
+        output_file           string      yes
+
+        test_options          string      yes           In auto_test_function, I find that config is necessay for
+                                                        user to test project. Score, judging script can make user
+                                                        to config flexible test.
+      2. The instrument_list is low limited, but user need to tell use the path of their input and output file.
+         User can use command args or redirect to input or output, we only need to prepare input file in user gived
+         path and read output file from user given path.
+    =end
+
 
     c_lang_compiler = ''
     execute_instruction = ''
@@ -74,10 +90,11 @@ class AutoTestController < ApplicationController
       # todo: in Linux & macOS, we use `./a.out` to run, check how it runs on Windows
       execute_instruction = './a.out'
     end
-    instrument_list = ["#{c_lang_compiler} {main_name}", "#{execute_instruction} > {output_name}"]
+    instrument_list = ["#{c_lang_compiler} #{main_name}", "#{execute_instruction} > #{output_name}"]
     # instrument_list = ["#{c_lang_compiler} {main_name}"]
 
-    exec_auto_test project_id.to_s, main_name, output_name, instrument_list
+    result = exec_auto_test project_id.to_s, main_name, output_name, instrument_list
+
 
   end
 

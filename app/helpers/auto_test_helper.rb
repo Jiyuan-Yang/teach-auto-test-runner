@@ -76,34 +76,42 @@ module AutoTestHelper
     Dir::chdir('../../../')
   end
 
-  # todo: use this method to get users' compiling instruction (stage 1)
   def exec_auto_test(project_id, main_name, output_name, instrument_list)
     puts("[I] Change working directory to #{AUTO_TEST_PROJECT_ROOT}/#{project_id}")
     Dir::chdir("#{AUTO_TEST_PROJECT_ROOT}/#{project_id}")
 
-    student_project_path_list = []
+    student_project_name_list = []
+    test_cases = get_auto_test_cases
 
     Dir.children("#{STUDENT_PROJECTS_DIR_NAME}/").each do |item|
-      student_project_path_list.append("#{STUDENT_PROJECTS_DIR_NAME}/#{item}")
+      student_project_name_list.append("#{item}")
     end
 
-    instrument_list[0].sub('{main_name}', main_name)
-    instrument_list[1].sub('{output_name}', output_name)
-    student_project_path_list.each do |item|
-      compile_and_run_single_project item, instrument_list
-    end
+    student_project_name_list.each do |item|
+      test_case.each do |num, files|
+        # prepare input file to the porject dir.
+        puts "[I] begin copying input file to #{STUDENT_PROJECTS_DIR_NAME}/#{item} dir."
+        system "cp #{files["input"]} #{STUDENT_PROJECTS_DIR_NAME}/#{item}/"
 
-    # there could be several output file for many cases in #{STUDENT_OUTPUT_DIR_NAME}/#{item} dir.
-    student_project_path_list.each do |item|
-      puts "[I] begin copying output file to STUDENT_OUTPUT_DIR_NAME for project #{item}"
-      if !Dir::exist? "#{STUDENT_OUTPUT_DIR_NAME}/#{item}"
-        Dir::mkdir "#{STUDENT_OUTPUT_DIR_NAME}/#{item}"
+        # run user`s instrument list for one student project.
+        compile_and_run_single_project "#{STUDENT_PROJECTS_DIR_NAME}/#{item}", instrument_list
+
+        # copy output file to STUDENT_OUTPUT_FIR_NAME for testing.
+        # there could be several output file for many cases in #{STUDENT_OUTPUT_DIR_NAME}/#{item} dir.
+        puts "[I] begin copying output file to STUDENT_OUTPUT_DIR_NAME for project #{item}"
+        if !Dir::exist? "#{STUDENT_OUTPUT_DIR_NAME}/#{item}"
+          Dir::mkdir "#{STUDENT_OUTPUT_DIR_NAME}/#{item}"
+        end
+        system "cp #{STUDENT_PROJECTS_DIR_NAME}/#{item}/#{output_name} #{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}_#{num}"
       end
-      system "cp #{STUDENT_PROJECTS_DIR_NAME}/#{item}/#{output_name} #{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}"
     end
+
+    result = auto_test_result_compare test_cases, student_project_name_list, output_name
 
     puts("[I] Working path reset to root directory")
     Dir::chdir('../../')
+    
+    return result
   end
 
   # This function must be called in the exec_auto_test funtion to keep the correct state of directory.
@@ -121,7 +129,10 @@ module AutoTestHelper
     return test_cases
   end
 
+  # todo: intruduce docker to run user`s project. In this way, we can supply mutiply envs and isolate
+  #        project running env and web server running env.
   # This function must be called in the exec_auto_test funtion to keep the correct state of directory.
+  # This function is a solid function to run user`s instrument list.
   def compile_and_run_single_project(project_dir ,instrument_list)
     puts "[I] begin compiling and running project #{project_dir}"
       Dir::chdir(project_dir) do 
@@ -131,9 +142,28 @@ module AutoTestHelper
       end
   end
 
-  # todo: use this method to get users' executing instruction (stage 2)
-  # todo: we could save files into one place
-  def auto_test_result_compare(test_cases)
+  # This function must be called in the exec_auto_test funtion to keep the correct state of directory.
+  def auto_test_result_compare(test_cases, student_project_name_list, output_name)
+    result = {}
+    student_project_name_list.each do |item|
+      if reset[item].nil?
+        result[item] = {}
+      end
+      test_cases.each do |num, files|
+        ouput_file = FILE::open "#{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}_#{num}", "r"
+        except_file = FILE::open files["except"], "r"
+        result[item][num] = result_compare output, except_file
+      end
+    end
+    return result
+  end
+
+  # todo: user could update compare file to define their special compare request.
+  # todo: design a score mechanism for user to judge output more exactly.
+  def result_compare(output_file, except_file)
+    output = output_file.read.strip
+    except = except_file.read.strip
+    return output == except
   end
 
   # todo: then we need to figure out a method to compare
