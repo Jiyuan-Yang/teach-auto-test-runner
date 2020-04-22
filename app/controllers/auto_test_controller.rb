@@ -106,10 +106,16 @@ class AutoTestController < ApplicationController
         if result[key][point_num_str] == true
           score = 1
         end
-        @auto_test_result = AutoTestResult.new
-        @auto_test_result.project_id = project_id
-        @auto_test_result.user_id = user_id
-        @auto_test_result.test_point_num = point_num
+        @auto_test_result = AutoTestResult.find_by(
+            :project_id => project_id, :user_id => user_id,
+            :test_point_num => point_num
+        )
+        if @auto_test_result.nil?
+          @auto_test_result = AutoTestResult.new
+          @auto_test_result.project_id = project_id
+          @auto_test_result.user_id = user_id
+          @auto_test_result.test_point_num = point_num
+        end
         @auto_test_result.score = score
         @auto_test_result.save
       end
@@ -117,7 +123,22 @@ class AutoTestController < ApplicationController
   end
 
   def get_auto_test_results
-
+    # user should provide :project_id
+    project_id = params[:project_id].to_i
+    all_result_in_project = AutoTestResult.where(:project_id => project_id)
+    result_dict = {}
+    all_user_id = []
+    all_result_in_project.group(:user_id).each do |item|
+      all_user_id.append(item.user_id)
+    end
+    all_user_id.each do |user_id|
+      if result_dict[user_id].nil?
+        result_dict[user_id] = {}
+      end
+      all_result_in_project.where(:user_id => user_id).each do |item|
+        result_dict[user_id][item.test_point_num.to_i] = item.score.to_i
+      end
+    end
+    render json: result_dict
   end
-
 end

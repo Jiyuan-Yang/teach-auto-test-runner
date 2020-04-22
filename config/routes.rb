@@ -3,4 +3,5 @@ Rails.application.routes.draw do
   # get '/init', to: 'auto_test#system_initializer'
   post '/create_auto_test_point', to: 'auto_test#create_auto_test_point'
   post '/start_auto_test', to: 'auto_test#start_auto_test'
+  get '/get_auto_test_results', to: 'auto_test#get_auto_test_results'
 end
