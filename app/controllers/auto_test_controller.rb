@@ -55,6 +55,9 @@ class AutoTestController < ApplicationController
       use_text_file = true
     end
 
+    compile_command = params[:compile_command]
+    exec_command = params[:exec_command]
+
     # check if there is a directory for this project, if not, create it
     project_dir_initializer(project_id)
 
@@ -91,8 +94,17 @@ class AutoTestController < ApplicationController
       # todo: in Linux & macOS, we use `./a.out` to run, check how it runs on Windows
       execute_instruction = './a.out'
     end
+
+    if compile_command.nil?
+      compile_command = "#{c_lang_compiler} #{main_name}"
+    end
+
+    if exec_command.nil?
+      exec_command = "#{execute_instruction}"
+    end
+
     # instrument_list = ["#{c_lang_compiler} #{main_name}", "#{execute_instruction} > #{output_name}.txt"]
-    instrument_list = ["#{c_lang_compiler} #{main_name}", "#{execute_instruction}"]
+    instrument_list = [compile_command, exec_command]
     # instrument_list = ["#{c_lang_compiler} {main_name}"]
 
     result = exec_auto_test project_id.to_s, main_name, output_name, instrument_list
