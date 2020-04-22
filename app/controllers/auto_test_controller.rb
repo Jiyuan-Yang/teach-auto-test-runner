@@ -109,6 +109,11 @@ class AutoTestController < ApplicationController
 
     result = exec_auto_test project_id.to_s, main_name, output_name, instrument_list
 
+    puts('')
+    puts('>>>>>>>>>>>> Collecting reuslts >>>>>>>>>>>>')
+    puts(result)
+    puts('>>>>>>>>>>>> Collecting reuslts >>>>>>>>>>>>')
+    puts('')
     # import result
     result.keys.each do |key|
       user_id = key.split('_')[-1].to_i
@@ -136,7 +141,10 @@ class AutoTestController < ApplicationController
 
   def get_auto_test_results
     # user should provide :project_id
+    puts(">>>>>?????#{params}")
     project_id = params[:project_id].to_i
+    puts(">>>>>>>><<<<<<<<")
+    puts(project_id)
     all_result_in_project = AutoTestResult.where(:project_id => project_id)
     result_dict = {}
     all_user_id = []
@@ -151,6 +159,11 @@ class AutoTestController < ApplicationController
         result_dict[user_id][item.test_point_num.to_i] = item.score.to_i
       end
     end
+    puts('')
+    puts('>>>>>>>>>>> Getting Reuslts >>>>>>>>>>>')
+    puts(result_dict)
+    puts('>>>>>>>>>>> Getting Reuslts >>>>>>>>>>>')
+    puts('')
     render json: result_dict
   end
 end
