@@ -42,9 +42,12 @@ module AutoTestHelper
     end
 
     project_auto_test_point = AutoTestPoint.where(:project_id => project_id)
+    puts("[Debug] #{project_auto_test_point}")
+    puts("[Debug] #{project_id}")
     project_auto_test_point.each_with_index do |item, cnt|
       atp_in_file = File.new("input_#{cnt}.txt", 'w')
       atp_out_file = File.new("output_#{cnt}.txt", 'w')
+      puts("[I] Creating test point, id: #{item.id}, project_id: #{item.project_id} input: #{item.input}, output: #{item.expected_output}")
       atp_in_file.write(item.input)
       atp_out_file.write(item.expected_output)
       atp_in_file.close
@@ -63,8 +66,8 @@ module AutoTestHelper
 
     # First, clean the directory
     Dir::children('./').each do |item|
-      puts("[I] cleaning #{item}")
-      system "rm -r #{item}"
+      puts("[I] cleaning #{item} -rf")
+      system "rm -rf #{item}"
     end
 
     git_repo_list.each do |item|
@@ -91,18 +94,18 @@ module AutoTestHelper
       test_cases.each do |num, files|
         # prepare input file to the project dir.
         puts "[I] begin copying input file to #{STUDENT_PROJECTS_DIR_NAME}/#{item} dir."
-        system "cp #{files["input"]} #{STUDENT_PROJECTS_DIR_NAME}/#{item}/"
+        system "cp #{files["input"]} #{STUDENT_PROJECTS_DIR_NAME}/#{item}/input.txt"
 
         # run user`s instrument list for one student project.
         compile_and_run_single_project "#{STUDENT_PROJECTS_DIR_NAME}/#{item}", instrument_list
 
         # copy output file to STUDENT_OUTPUT_FIR_NAME for testing.
         # there could be several output file for many cases in #{STUDENT_OUTPUT_DIR_NAME}/#{item} dir.
-        puts "[I] begin copying output file to STUDENT_OUTPUT_DIR_NAME for project #{item}"
+        puts "[I] begin copying output file to #{STUDENT_OUTPUT_DIR_NAME} for project #{item}"
         if !Dir::exist? "#{STUDENT_OUTPUT_DIR_NAME}/#{item}"
           Dir::mkdir "#{STUDENT_OUTPUT_DIR_NAME}/#{item}"
         end
-        system "cp #{STUDENT_PROJECTS_DIR_NAME}/#{item}/#{output_name} #{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}_#{num}.txt"
+        system "cp #{STUDENT_PROJECTS_DIR_NAME}/#{item}/#{output_name}.txt #{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}_#{num}.txt"
       end
     end
 
@@ -129,11 +132,11 @@ module AutoTestHelper
     test_cases
   end
 
-  # todo: introduce docker to run user`s project. In this way, we can supply mutiply envs and isolate
+  # todo: introduce docker to run user`s project. In this way, we can supply multiply envs and isolate
   #        project running env and web server running env.
-  # This function must be called in the exec_auto_test funtion to keep the correct state of directory.
+  # This function must be called in the exec_auto_test function to keep the correct state of directory.
   # This function is a solid function to run user`s instrument list.
-  def compile_and_run_single_project(project_dir ,instrument_list)
+  def compile_and_run_single_project(project_dir, instrument_list)
     puts "[I] begin compiling and running project #{project_dir}"
       Dir::chdir(project_dir) do 
         instrument_list.each do |instrument|
@@ -146,14 +149,20 @@ module AutoTestHelper
   def auto_test_result_compare(test_cases, student_project_name_list, output_name)
     result = {}
     student_project_name_list.each do |item|
-      if reset[item].nil?
+      if result[item].nil?
         result[item] = {}
       end
       test_cases.each do |num, files|
-        output_file = FILE::open "#{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}_#{num}.txt", "r"
+        # puts("[Debug] :::::::::: #{Dir.pwd}")
+        # puts("#{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}_#{num}.txt")
+        # puts(files["output"])
+        # puts('>>>>>')
+        # puts("#{Dir.pwd}/#{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}_#{num}.txt")
+        output_file = File.open("#{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}_#{num}.txt", "r")
         # expected_file = FILE::open files["expected"], "r"
-        expected_file = FILE::open files["output"], "r"
+        expected_file = File.open("#{files["output"]}", "r")
         result[item][num] = result_compare output_file, expected_file
+
       end
     end
     result

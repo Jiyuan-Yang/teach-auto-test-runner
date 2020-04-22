@@ -90,12 +90,12 @@ class AutoTestController < ApplicationController
       # todo: in Linux & macOS, we use `./a.out` to run, check how it runs on Windows
       execute_instruction = './a.out'
     end
-    instrument_list = ["#{c_lang_compiler} #{main_name}", "#{execute_instruction} > #{output_name}"]
+    instrument_list = ["#{c_lang_compiler} #{main_name}", "#{execute_instruction} > #{output_name}.txt"]
     # instrument_list = ["#{c_lang_compiler} {main_name}"]
 
     result = exec_auto_test project_id.to_s, main_name, output_name, instrument_list
-
-
+    puts('>>>>>>>>>>>>>>>>>')
+    puts(result)
   end
 
   def get_auto_test_results
