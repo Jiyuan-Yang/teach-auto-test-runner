@@ -88,8 +88,8 @@ module AutoTestHelper
     end
 
     student_project_name_list.each do |item|
-      test_case.each do |num, files|
-        # prepare input file to the porject dir.
+      test_cases.each do |num, files|
+        # prepare input file to the project dir.
         puts "[I] begin copying input file to #{STUDENT_PROJECTS_DIR_NAME}/#{item} dir."
         system "cp #{files["input"]} #{STUDENT_PROJECTS_DIR_NAME}/#{item}/"
 
@@ -102,7 +102,7 @@ module AutoTestHelper
         if !Dir::exist? "#{STUDENT_OUTPUT_DIR_NAME}/#{item}"
           Dir::mkdir "#{STUDENT_OUTPUT_DIR_NAME}/#{item}"
         end
-        system "cp #{STUDENT_PROJECTS_DIR_NAME}/#{item}/#{output_name} #{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}_#{num}"
+        system "cp #{STUDENT_PROJECTS_DIR_NAME}/#{item}/#{output_name} #{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}_#{num}.txt"
       end
     end
 
@@ -111,25 +111,25 @@ module AutoTestHelper
     puts("[I] Working path reset to root directory")
     Dir::chdir('../../')
     
-    return result
+    result
   end
 
-  # This function must be called in the exec_auto_test funtion to keep the correct state of directory.
+  # This function must be called in the exec_auto_test function to keep the correct state of directory.
   def get_auto_test_cases
     test_cases = {}
 
     Dir.children("#{TEST_DATA_DIR_NAME}/").each do |item|
       type = item.split('_')[0]
       num = item.split('_')[1].split('.')[0].to_i
-      if test_case[num].nil?
-        test_case[num] = {}
+      if test_cases[num].nil?
+        test_cases[num] = {}
       end
-      test_case[num][type] = "#{TEST_DATA_DIR_NAME}/#{item}"
+      test_cases[num][type] = "#{TEST_DATA_DIR_NAME}/#{item}"
     end
-    return test_cases
+    test_cases
   end
 
-  # todo: intruduce docker to run user`s project. In this way, we can supply mutiply envs and isolate
+  # todo: introduce docker to run user`s project. In this way, we can supply mutiply envs and isolate
   #        project running env and web server running env.
   # This function must be called in the exec_auto_test funtion to keep the correct state of directory.
   # This function is a solid function to run user`s instrument list.
@@ -150,22 +150,20 @@ module AutoTestHelper
         result[item] = {}
       end
       test_cases.each do |num, files|
-        ouput_file = FILE::open "#{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}_#{num}", "r"
-        except_file = FILE::open files["except"], "r"
-        result[item][num] = result_compare output, except_file
+        output_file = FILE::open "#{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}_#{num}.txt", "r"
+        # expected_file = FILE::open files["expected"], "r"
+        expected_file = FILE::open files["output"], "r"
+        result[item][num] = result_compare output_file, expected_file
       end
     end
-    return result
+    result
   end
 
   # todo: user could update compare file to define their special compare request.
   # todo: design a score mechanism for user to judge output more exactly.
-  def result_compare(output_file, except_file)
+  def result_compare(output_file, expected_file)
     output = output_file.read.strip
-    except = except_file.read.strip
-    return output == except
+    expected = expected_file.read.strip
+    output == expected
   end
-
-  # todo: then we need to figure out a method to compare
-  # todo: def ... ...
 end
