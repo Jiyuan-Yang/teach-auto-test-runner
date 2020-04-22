@@ -10,12 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_20_023713) do
+ActiveRecord::Schema.define(version: 2020_04_22_050447) do
 
   create_table "auto_test_points", force: :cascade do |t|
     t.integer "project_id"
     t.text "input"
     t.text "expected_output"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "auto_test_results", force: :cascade do |t|
+    t.integer "project_id"
+    t.integer "user_id"
+    t.integer "test_point_num"
+    t.integer "score"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

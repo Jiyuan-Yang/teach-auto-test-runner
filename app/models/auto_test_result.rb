@@ -1,0 +1,2 @@
+class AutoTestResult < ApplicationRecord
+end

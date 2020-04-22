@@ -44,6 +44,7 @@ class AutoTestController < ApplicationController
     project_id = params[:project_id].to_i
     # use `,` to split
     # todo: here we use http to clone, consider to use SSH later
+    # ATTENTION: the last element of project name should be user_id
     git_repo_list = params[:git_repo_list].split(',')
     # todo: currently, we load test point from db, transfer them into txt
     # todo: in the future, we will offer the user a boolean var `use_text_file`
@@ -72,30 +73,47 @@ class AutoTestController < ApplicationController
 
     c_lang_compiler = ''
     execute_instruction = ''
-    main_name = 'main.c'
+    main_name = 'main.cpp'
     output_name = 'output'
 
     if /darwin/i =~ RUBY_PLATFORM
       # BSD UNIX -> darwin -> macOS
       # in macOS, use clang in default
-      c_lang_compiler = 'clang'
+      c_lang_compiler = 'clang++'
       execute_instruction = './a.out'
     elsif /linux/i =~ RUBY_PLATFORM
       # GNU Linux
       # in Linux, use gcc in default
-      c_lang_compiler = 'gcc'
+      c_lang_compiler = 'g++'
       execute_instruction = './a.out'
     else
-      c_lang_compiler = 'gcc'
+      c_lang_compiler = 'g++'
       # todo: in Linux & macOS, we use `./a.out` to run, check how it runs on Windows
       execute_instruction = './a.out'
     end
-    instrument_list = ["#{c_lang_compiler} #{main_name}", "#{execute_instruction} > #{output_name}.txt"]
+    # instrument_list = ["#{c_lang_compiler} #{main_name}", "#{execute_instruction} > #{output_name}.txt"]
+    instrument_list = ["#{c_lang_compiler} #{main_name}", "#{execute_instruction}"]
     # instrument_list = ["#{c_lang_compiler} {main_name}"]
 
     result = exec_auto_test project_id.to_s, main_name, output_name, instrument_list
-    puts('>>>>>>>>>>>>>>>>>')
-    puts(result)
+
+    # import result
+    result.keys.each do |key|
+      user_id = key.split('_')[-1].to_i
+      result[key].keys.each do |point_num_str|
+        point_num = point_num_str.to_i
+        score = 0
+        if result[key][point_num_str] == true
+          score = 1
+        end
+        @auto_test_result = AutoTestResult.new
+        @auto_test_result.project_id = project_id
+        @auto_test_result.user_id = user_id
+        @auto_test_result.test_point_num = point_num
+        @auto_test_result.score = score
+        @auto_test_result.save
+      end
+    end
   end
 
   def get_auto_test_results
