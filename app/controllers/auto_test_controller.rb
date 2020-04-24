@@ -117,6 +117,10 @@ class AutoTestController < ApplicationController
     # import result
     result.keys.each do |key|
       user_id = key.split('_')[-1].to_i
+      user_id2 = nil
+      if params[:test_type] == 'pair'
+        user_id2 = key.split('_')[-2].to_i
+      end
       result[key].keys.each do |point_num_str|
         point_num = point_num_str.to_i
         score = 0
@@ -127,6 +131,12 @@ class AutoTestController < ApplicationController
             :project_id => project_id, :user_id => user_id,
             :test_point_num => point_num
         )
+        if params[:test_type] == 'pair'
+          @auto_test_result2 = AutoTestResult.find_by(
+              :project_id => project_id, :user_id => user_id2,
+              :test_point_num => point_num
+          )
+        end
         if @auto_test_result.nil?
           @auto_test_result = AutoTestResult.new
           @auto_test_result.project_id = project_id
@@ -135,6 +145,16 @@ class AutoTestController < ApplicationController
         end
         @auto_test_result.score = score
         @auto_test_result.save
+        if params[:test_type] == 'pair'
+          if @auto_test_result2.nil?
+            @auto_test_result2 = AutoTestResult.new
+            @auto_test_result2.project_id = project_id
+            @auto_test_result2.user_id = user_id2
+            @auto_test_result2.test_point_num = point_num
+          end
+          @auto_test_result2.score = score
+          @auto_test_result2.save
+        end
       end
     end
   end

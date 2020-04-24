@@ -105,6 +105,12 @@ module AutoTestHelper
         if !Dir::exist? "#{STUDENT_OUTPUT_DIR_NAME}/#{item}"
           Dir::mkdir "#{STUDENT_OUTPUT_DIR_NAME}/#{item}"
         end
+
+        # judge if there is an output file
+        if Dir.children("#{STUDENT_PROJECTS_DIR_NAME}/#{item}/").index('output.txt').nil?
+          File.new("#{STUDENT_PROJECTS_DIR_NAME}/#{item}/#{output_name}.txt", "w")
+        end
+
         system "cp #{STUDENT_PROJECTS_DIR_NAME}/#{item}/#{output_name}.txt #{STUDENT_OUTPUT_DIR_NAME}/#{item}/#{output_name}_#{num}.txt"
       end
     end
