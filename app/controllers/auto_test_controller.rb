@@ -50,9 +50,14 @@ class AutoTestController < ApplicationController
     # todo: in the future, we will offer the user a boolean var `use_text_file`
     # todo: if true, generate *.txt. Now we regarded it as true
     use_text_file = params[:use_text_file]
+    use_text_output = params[:use_text_file]
     if use_text_file.nil?
       # currently, default is `true`
       use_text_file = true
+    end
+
+    if use_text_output.nil?
+      use_text_output = true
     end
 
     compile_command = params[:compile_command]
@@ -101,6 +106,10 @@ class AutoTestController < ApplicationController
 
     if exec_command.nil?
       exec_command = "#{execute_instruction}"
+    end
+
+    if !use_text_output
+      exec_command += " > #{output_name}.txt"
     end
 
     # instrument_list = ["#{c_lang_compiler} #{main_name}", "#{execute_instruction} > #{output_name}.txt"]
