@@ -14,7 +14,7 @@
 
 ## API
 ```
-post '/create_auto_test_point'
+post /create_auto_test_point
 ```
 | 参数 | 类型 | 含义 |
 | :------ | :------: | :------ |
@@ -22,5 +22,27 @@ post '/create_auto_test_point'
 | :input | text | 测试点输入 |
 | :expected_output | text | 测试点期望输出 |
 
+----
+
+```
+post /start_auto_test
+```
+
+| 参数             |  类型   | 含义                                                         |
+| :--------------- | :-----: | :----------------------------------------------------------- |
+| :project_id      | integer | 评测点对应的项目ID，注意是公共发布区project的id              |
+| :git_repo_list   |  text   | 需要拉取的仓库地址，提供Http格式的地址，地址之间使用一个英文逗号分隔，整体为一个字符串 |
+| :use_text_file   |  text   | 是否使用文本作为输入，若为True，则会在待测试的仓库中生成`input.txt`，若为False，直接使用标准输入 |
+| :use_text_output |  text   | 是否使用文本作为输出，若为True，则测试的仓库中运行结束后应该生成`output.txt`，若为False，直接使用标准输出 |
+| :compile_command | string  | 编译指令                                                     |
+| :exec_command    | string  | 执行指令                                                     |
 
 ----
+
+```
+get /get_auto_test_results
+```
+
+| 参数        |  类型   | 含义                                            |
+| :---------- | :-----: | :---------------------------------------------- |
+| :project_id | integer | 评测点对应的项目ID，注意是公共发布区project的id |

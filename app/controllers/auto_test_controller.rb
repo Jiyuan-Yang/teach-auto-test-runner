@@ -50,7 +50,7 @@ class AutoTestController < ApplicationController
     # todo: in the future, we will offer the user a boolean var `use_text_file`
     # todo: if true, generate *.txt. Now we regarded it as true
     use_text_file = params[:use_text_file]
-    use_text_output = params[:use_text_file]
+    use_text_output = params[:use_text_output]
     if use_text_file.nil?
       # currently, default is `true`
       use_text_file = true
