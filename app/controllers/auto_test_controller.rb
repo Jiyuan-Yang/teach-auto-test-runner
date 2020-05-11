@@ -40,6 +40,16 @@ class AutoTestController < ApplicationController
     render json: {:auto_test_point_id => auto_test_point_id, :status => 'Okay'}
   end
 
+  def get_auto_test_points
+    @auto_test_points = AutoTestPoint.where(project_id: params[:project_id])
+    points = Array.new
+    @auto_test_points.each do |point|
+      point.push {:input => point[:input], :expected_output => point[:expected_output]}
+    end
+    render json: points
+    
+  end
+
   def start_auto_test
     project_id = params[:project_id].to_i
     # use `,` to split
