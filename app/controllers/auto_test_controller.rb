@@ -44,10 +44,15 @@ class AutoTestController < ApplicationController
     @auto_test_points = AutoTestPoint.where(project_id: params[:project_id])
     points = Array.new
     @auto_test_points.each do |point|
-      point.push {:input => point[:input], :expected_output => point[:expected_output]}
+      points.append({:id => point[:id], :input => point[:input], :expected_output => point[:expected_output]})
     end
     render json: points
-    
+  end
+
+  def remove_auto_test_point
+    point_id = params[:id]
+    AutoTestPoint.find(point_id).destroy
+    print("[log] remove point with id #{point_id}")
   end
 
   def start_auto_test
