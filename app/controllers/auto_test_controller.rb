@@ -44,7 +44,7 @@ class AutoTestController < ApplicationController
     @auto_test_points = AutoTestPoint.where(project_id: params[:project_id])
     points = Array.new
     @auto_test_points.each do |point|
-      point.push {:input => point[:input], :expected_output => point[:expected_output]}
+      point.push({"input" => point["input"], "expected_output" => point["expected_output"]})
     end
     render json: points
     
