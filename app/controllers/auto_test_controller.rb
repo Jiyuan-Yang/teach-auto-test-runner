@@ -30,6 +30,13 @@ class AutoTestController < ApplicationController
       :get_auto_test_results
   ]
 
+  def query_runner
+    p '#####'
+    res = {id: '0', os: 'Ubuntu 19.03', key: 'agile soft engineering'}
+    p res
+    render json: res
+  end
+
   def create_auto_test_point
     @auto_test_point = AutoTestPoint.new
     @auto_test_point.project_id = params[:project_id]

@@ -6,4 +6,5 @@ Rails.application.routes.draw do
   get '/get_auto_test_results', to: 'auto_test#get_auto_test_results'
   get '/get_auto_test_points', to: 'auto_test#get_auto_test_points'
   get '/remove_auto_test_point', to: 'auto_test#remove_auto_test_point'
+  get '/query_runner', to: 'auto_test#query_runner'
 end
