@@ -135,18 +135,23 @@ class AutoTestController < ApplicationController
     end
 
     # instrument_list = ["#{c_lang_compiler} #{main_name}", "#{execute_instruction} > #{output_name}.txt"]
-    instrument_list = [compile_command, exec_command]
+    # instrument_list = [compile_command, exec_command]
+    instruments = {compile: [compile_command], exec: [exec_command]}
+    =begin
+      time: the seconds to limit running test program
+    =end 
+    limitation = {time: 60}
     # instrument_list = ["#{c_lang_compiler} {main_name}"]
 
-    result = exec_auto_test project_id.to_s, main_name, output_name, instrument_list
+    total_result = exec_auto_test project_id.to_s, main_name, output_name, instruments, limitation
 
     puts('')
-    puts('>>>>>>>>>>>> Collecting reuslts >>>>>>>>>>>>')
-    puts(result)
-    puts('>>>>>>>>>>>> Collecting reuslts >>>>>>>>>>>>')
+    puts('>>>>>>>>>>>> Collecting results >>>>>>>>>>>>')
+    puts(total_result)
+    puts('>>>>>>>>>>>> Collecting results >>>>>>>>>>>>')
     puts('')
     # import result
-    result.keys.each do |key|
+    total_result[:results].keys.each do |key|
       user_id = key.split('_')[-1].to_i
       user_id2 = nil
       if params[:test_type] == 'pair'
@@ -211,9 +216,9 @@ class AutoTestController < ApplicationController
       end
     end
     puts('')
-    puts('>>>>>>>>>>> Getting Reuslts >>>>>>>>>>>')
+    puts('>>>>>>>>>>> Getting Results >>>>>>>>>>>')
     puts(result_dict)
-    puts('>>>>>>>>>>> Getting Reuslts >>>>>>>>>>>')
+    puts('>>>>>>>>>>> Getting Results >>>>>>>>>>>')
     puts('')
     render json: result_dict
   end

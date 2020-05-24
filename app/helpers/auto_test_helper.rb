@@ -1,3 +1,5 @@
+require 'open4'
+
 module AutoTestHelper
   AUTO_TEST_PROJECT_ROOT = 'auto_test_data'
   TEST_DATA_DIR_NAME = 'test_data'
@@ -79,7 +81,7 @@ module AutoTestHelper
     Dir::chdir('../../../')
   end
 
-  def exec_auto_test(project_id, main_name, output_name, instrument_list)
+  def exec_auto_test(project_id, main_name, output_name, instruments, limitation)
     puts("[I] Change working directory to #{AUTO_TEST_PROJECT_ROOT}/#{project_id}")
     Dir::chdir("#{AUTO_TEST_PROJECT_ROOT}/#{project_id}")
 
@@ -90,6 +92,7 @@ module AutoTestHelper
       student_project_name_list.append("#{item}")
     end
 
+    total_result = {running_status: {}, results: {}}
     student_project_name_list.each do |item|
       test_cases.each do |num, files|
         # prepare input file to the project dir.
@@ -97,7 +100,7 @@ module AutoTestHelper
         system "cp #{files["input"]} #{STUDENT_PROJECTS_DIR_NAME}/#{item}/input.txt"
 
         # run user`s instrument list for one student project.
-        compile_and_run_single_project "#{STUDENT_PROJECTS_DIR_NAME}/#{item}", instrument_list
+        total_result[:running_status][item] =  compile_and_run_single_project "#{STUDENT_PROJECTS_DIR_NAME}/#{item}", instruments, limitation
 
         # copy output file to STUDENT_OUTPUT_FIR_NAME for testing.
         # there could be several output file for many cases in #{STUDENT_OUTPUT_DIR_NAME}/#{item} dir.
@@ -115,12 +118,12 @@ module AutoTestHelper
       end
     end
 
-    result = auto_test_result_compare test_cases, student_project_name_list, output_name
+    total_result[:results] = auto_test_result_compare test_cases, student_project_name_list, output_name
 
     puts("[I] Working path reset to root directory")
     Dir::chdir('../../')
     
-    result
+    total_result
   end
 
   # This function must be called in the exec_auto_test function to keep the correct state of directory.
@@ -142,13 +145,28 @@ module AutoTestHelper
   #        project running env and web server running env.
   # This function must be called in the exec_auto_test function to keep the correct state of directory.
   # This function is a solid function to run user`s instrument list.
-  def compile_and_run_single_project(project_dir, instrument_list)
+  def compile_and_run_single_project(project_dir, instruments, limitation)
     puts "[I] begin compiling and running project #{project_dir}"
-      Dir::chdir(project_dir) do 
-        instrument_list.each do |instrument|
-          system instrument
+    Dir::chdir(project_dir) do
+      now_period = ''
+      begin
+        instruments.each do |period, instrument_list|
+          now_period = period
+          if period == 'compile'
+            instrument_list.each do |instrument|
+              status = open4.spawn instrument
+            end
+          elsif period == 'exec'
+            instrument_list.each do |instrument|
+              status = open4.spawn instrument, :timeout => limitation[:time]
+            end
+          end
         end
+      rescue SpawnError
+        return {status: 'error', period: now_period, exitstatus: SpawnError.exitstatus}
       end
+    end
+    {status: 'ok'}
   end
 
   # This function must be called in the exec_auto_test funtion to keep the correct state of directory.
