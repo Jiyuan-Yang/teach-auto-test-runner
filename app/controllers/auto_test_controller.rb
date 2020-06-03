@@ -137,9 +137,8 @@ class AutoTestController < ApplicationController
     # instrument_list = ["#{c_lang_compiler} #{main_name}", "#{execute_instruction} > #{output_name}.txt"]
     # instrument_list = [compile_command, exec_command]
     instruments = {compile: [compile_command], exec: [exec_command]}
-    =begin
-      time: the seconds to limit running test program
-    =end 
+    
+    # time: the seconds to limit running test program
     limitation = {time: 60}
     # instrument_list = ["#{c_lang_compiler} {main_name}"]
 
